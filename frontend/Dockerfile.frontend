@@ -11,7 +11,8 @@ COPY . ./
 RUN npm run build   # produces .next (server‑rendered build)
 
 # ---------- Runtime stage ----------
-FROM node:20-alpine                # Node runtime – we serve the Next.js server, not nginx
+FROM node:20-alpine
+# Node runtime – we serve the Next.js server, not nginx
 WORKDIR /app
 
 # Copy only what we need to run the server
