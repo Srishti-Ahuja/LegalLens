@@ -1,0 +1,29 @@
+# ---------- Build stage ----------
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy source and build
+COPY . ./
+RUN npm run build   # produces .next (server‑rendered build)
+
+# ---------- Runtime stage ----------
+FROM node:20-alpine                # Node runtime – we serve the Next.js server, not nginx
+WORKDIR /app
+
+# Copy only what we need to run the server
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/public ./public   # static assets (favicon, etc.)
+
+# Expose the port Render will map (Render injects $PORT, default 10000; Next.js defaults to 3000)
+ENV PORT=${PORT:-3000}
+EXPOSE 3000
+
+# Start the Next.js server
+CMD ["npm", "run", "start"]   # "next start" under the hood
