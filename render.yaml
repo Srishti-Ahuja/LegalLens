@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: legallens-backend
+    env: python
+    buildCommand: "cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    startCommand: "cd backend && gunicorn legal_project.wsgi:application --workers 1 --threads 2 --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+
+  - type: web
+    name: legallens-frontend
+    env: static
+    buildCommand: "cd frontend && npm install && npm run build"
+    staticPublishPath: "./frontend/out"
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: "https://legallens-backend.onrender.com/api"
