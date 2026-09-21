@@ -1,5 +1,4 @@
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/,'') || 'http://localhost:8000';
-const API_URL = `${BACKEND_URL}/api`;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://legallens-backend.onrender.com/api';
 
 export interface RiskItem {
   clause: string;

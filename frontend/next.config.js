@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // output: 'export', // removed for server mode
+    output: 'export',
 
     images: {
         unoptimized: true,
