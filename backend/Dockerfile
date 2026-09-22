@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 8000
 
 # Run migrations and start the server with gunicorn
-CMD gunicorn legal_project.wsgi:application --bind 0.0.0.0:${PORT} --workers 2
+CMD gunicorn legal_project.wsgi:application --bind 0.0.0.0:${PORT} --workers 2 --timeout 120

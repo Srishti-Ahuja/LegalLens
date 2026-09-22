@@ -29,16 +29,24 @@ class UploadView(APIView):
             
             full_text = []
             
+            import concurrent.futures
+
             # 2. Extract and Chunk
-            for chunk_data in pdf_service.extract_and_chunk_pdf(file_content, file_obj.name):
+            chunks = list(pdf_service.extract_and_chunk_pdf(file_content, file_obj.name))
+            
+            def process_chunk(chunk_data):
                 vector_service.save_chunk(
                     doc_id, 
                     chunk_data['page_number'], 
                     chunk_data['chunk_index'], 
                     chunk_data['content']
                 )
-                full_text.append(chunk_data['content'])
-            
+                return chunk_data['content']
+
+            full_text = []
+            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                full_text = list(executor.map(process_chunk, chunks))
+
             # Combine all chunk texts
             joined_text = " ".join(full_text).strip()
 
@@ -47,9 +55,12 @@ class UploadView(APIView):
                 summary = "No document text could be extracted."
                 risks = []
             else:
-                # 3. Analyze using Gemini
-                summary = gemini_service.generate_plain_summary(joined_text)
-                risks = gemini_service.extract_clause_risks(joined_text)
+                # 3. Analyze using Gemini concurrently
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                    summary_future = executor.submit(gemini_service.generate_plain_summary, joined_text)
+                    risks_future = executor.submit(gemini_service.extract_clause_risks, joined_text)
+                    summary = summary_future.result()
+                    risks = risks_future.result()
             
             vector_service.update_document_analysis(doc_id, summary, risks)
             
