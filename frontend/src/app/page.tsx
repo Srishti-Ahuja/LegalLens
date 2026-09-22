@@ -5,6 +5,7 @@ import FileUploader from '../components/FileUploader';
 import RiskBadge from '../components/RiskBadge';
 import ChatInterface from '../components/ChatInterface';
 import { AnalysisResult } from '../lib/api';
+import ReactMarkdown from 'react-markdown';
 
 export default function Home() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
@@ -57,10 +58,7 @@ export default function Home() {
             <div className="flex-1 overflow-y-auto p-6">
               {activeTab === 'summary' ? (
                 <div className="prose prose-slate prose-sm max-w-none">
-                  {/* Gemini's summary is returned as plain text/markdown. Using simple formatting here. */}
-                  {analysis.summary.split('\n').map((line, i) => (
-                    <p key={i} className="mb-2">{line.replace(/\*\*/g, '')}</p> 
-                  ))}
+                  <ReactMarkdown>{analysis.summary}</ReactMarkdown>
                 </div>
               ) : (
                 <div className="flex flex-col gap-1">
